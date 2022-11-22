@@ -1,32 +1,11 @@
-// const { fileServices } = require("../service");
-const {fileServices} = require("../services");
+const User = require("../dataBase/User");
 
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await fileServices.reader();
+            const users = await User.find({});
 
             res.json(users);
-        } catch (e) {
-            next(e);
-        }
-    },
-
-    create: async (req, res, next) => {
-        try {
-            const userInfo = req.body;
-            const users = await fileServices.reader();
-
-            const newUser = {
-                id: users[users.length -1].id + 1,
-                name: userInfo.name,
-                age: userInfo.age
-            };
-            users.push(newUser);
-
-            await fileServices.writer(users);
-
-            res.status(201).json(newUser);
         } catch (e) {
             next(e);
         }
@@ -42,29 +21,32 @@ module.exports = {
 
     updateUser: async (req, res, next) => {
         try {
-            const { user, users, body } = req;
+            const newUserInfo = req.body;
+            const userId = req.params.userId;
 
-            const index = users.findIndex((u) => u.id === user.id);
-            users[index] = { ...users[index], ...body };
+            await User.findByIdAndUpdate(userId, newUserInfo);
 
-            await fileServices.writer(users);
-
-            res.status(201).json(users[index]);
+            res.json('Updated')
         } catch (e) {
             next(e);
         }
     },
 
-    deleteUser: async (req, res, next) => {
+    createUser: async (req, res, next) => {
         try {
-            const { user, users } = req;
+            await User.create(req.body);
 
-            const index = users.findIndex((u) => u.id === user.id);
-            users.splice(index, 1);
+            res.json('Ok')
+        } catch (e) {
+            next(e);
+        }
+    },
 
-            await fileServices.writer(users);
+    deleteUserById: async (req, res, next) => {
+        try {
+            await User.deleteOne({ _id: req.params.userId });
 
-            res.sendStatus(204);
+            res.status(204).send('Ok')
         } catch (e) {
             next(e);
         }
