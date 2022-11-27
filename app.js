@@ -1,9 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
-require('dotenv').config();
+require('dotenv').config()
 
 const userRouter = require('./router/user.router');
+const authRouter = require('./router/auth.router');
 const configs = require('./config/config');
 
 const app = express();
@@ -11,6 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 
 app.get('/', (req, res) => {
@@ -25,7 +26,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(configs.PORT, async () => {
-    await mongoose.connect(configs.MONGO_URL);
+    await mongoose.connect('mongodb://127.0.0.1/june2022');
     console.log(`Server listen ${configs.PORT}`);
 
 });
