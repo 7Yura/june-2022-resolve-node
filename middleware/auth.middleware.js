@@ -35,11 +35,12 @@ module.exports = {
             oauthService.checkToken(accessToken);
 
             const tokenInfo = await OAuth.findOne({ accessToken });
-
+            console.log(tokenInfo);
             if (!tokenInfo) {
                 throw new ApiError('Token not valid', 401);
             }
 
+            req.tokenInfo = tokenInfo;
             next();
         } catch (e) {
             next(e);

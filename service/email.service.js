@@ -5,15 +5,16 @@ const { NO_REPLY_EMAIL, NO_REPLY_EMAIL_PASSWORD } = require('../config/config');
 const emailTemplates = require('../email-templates');
 const ApiError = require("../error/ApiError");
 
-const sendEmail = async (receiverMail, emailAction, locals = {}) => { // WELCOME: "welcome",
-    console.log(emailAction, '- EMAIL SERVICE')
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: NO_REPLY_EMAIL,
-            pass: NO_REPLY_EMAIL_PASSWORD
-        }
-    });
+const sendEmail = async (receiverMail, emailAction, locals = {}) =>{}
+// { // WELCOME: "welcome",
+//     console.log(emailAction, '- EMAIL SERVICE')
+//     const transporter = nodemailer.createTransport({
+//         service: 'gmail',
+//         auth: {
+//             user: NO_REPLY_EMAIL,
+//             pass: NO_REPLY_EMAIL_PASSWORD
+//         }
+//     });
 
     // console.log('EM TEM -__________________-');
     // console.log(emailTemplates);
@@ -39,14 +40,14 @@ const sendEmail = async (receiverMail, emailAction, locals = {}) => { // WELCOME
     //
     // const html = await templateRenderer.render(templateInfo.templateName, locals);
 
-    return transporter.sendMail({
-        from: 'No reply',
-        to: receiverMail,
-        subject: 'hello',
-        // templateInfo.subject,
-        html:'<h2>hello friend</h2>'
-    });
-}
+//     return transporter.sendMail({
+//         from: 'No reply',
+//         to: receiverMail,
+//         subject: 'hello',
+//         // templateInfo.subject,
+//         html:'<h2>hello friend</h2>'
+//     });
+// }
 
 module.exports = {
     sendEmail
