@@ -28,5 +28,4 @@ app.use((err, req, res, next) => {
 app.listen(configs.PORT, async () => {
     await mongoose.connect('mongodb://127.0.0.1/june2022');
     console.log(`Server listen ${configs.PORT}`);
-
 });
