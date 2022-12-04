@@ -15,36 +15,35 @@ const sendEmail = async (receiverMail, emailAction, locals = {}) => { // WELCOME
         }
     });
 
-    // console.log('EM TEM -__________________-');
-    // console.log(emailTemplates);
-    // console.log('EM TEM -__________________-');
-    //
-    // const templateInfo = emailTemplates[emailAction];
-    //
-    // console.log('TEMP INFO (*************************8');
-    // console.log(templateInfo);
-    // console.log('TEMP INFO (*************************8');
-    //
-    // if (!templateInfo) {
-    //     throw new ApiError('Wrong template', 500);
-    // }
-    //
-    // const templateRenderer = new EmailTemplates({
-    //     views: {
-    //         root: path.join(process.cwd(), 'email-templates')
-    //     }
-    // });
-    //
-    // Object.assign(locals || {}, { frontendURL: 'google.com' });
-    //
-    // const html = await templateRenderer.render(templateInfo.templateName, locals);
+    console.log('EM TEM -__________________-');
+    console.log(emailTemplates);
+    console.log('EM TEM -__________________-');
+
+    const templateInfo = emailTemplates[emailAction];
+
+    console.log('TEMP INFO (*************************8');
+    console.log(templateInfo);
+    console.log('TEMP INFO (*************************8');
+
+    if (!templateInfo) {
+        throw new ApiError('Wrong template', 500);
+    }
+
+    const templateRenderer = new EmailTemplates({
+        views: {
+            root: path.join(process.cwd(), 'email-templates')
+        }
+    });
+
+    Object.assign(locals || {}, { frontendURL: 'google.com' });
+
+    const html = await templateRenderer.render(templateInfo.templateName, locals);
 
     return transporter.sendMail({
         from: 'No reply',
         to: receiverMail,
-        subject: 'hello',
-        // templateInfo.subject,
-        html:'<h2>hello friend</h2>'
+        subject: templateInfo.subject,
+        html
     });
 }
 
