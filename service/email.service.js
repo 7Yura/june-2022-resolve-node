@@ -1,81 +1,49 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
+const nodemailer = require('nodemailer');
+const hbs = require('nodemailer-express-handlebars');
+const path = require('path');
+const { NO_REPLY_EMAIL, NO_REPLY_EMAIL_PASSWORD, FRONTEND_URL } = require('../config/config');
+const emailTemplates = require('../email-templates');
 const ApiError = require("../error/ApiError");
-const {
-    ACCESS_SECRET,
-    REFRESH_SECRET,
-    CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET,
-    FORGOT_PASSWORD_ACTION_TOKEN_SECRET
-} = require('../config/config');
-const { tokenTypeEnum } = require('../enum');
-const tokenTypes = require("../config/token-action.enum");
+
+const sendEmail = async (receiverMail, emailAction, context = {}) => {
+    const transporter = nodemailer.createTransport({
+        from: 'No reply',
+        service: 'gmail',
+        auth: {
+            user: NO_REPLY_EMAIL,
+            pass: NO_REPLY_EMAIL_PASSWORD
+        }
+    });
+
+    const templateInfo = emailTemplates[emailAction];
+
+    if (!templateInfo?.subject || !templateInfo.templateName) {
+        throw new ApiError('Wrong template', 500);
+    }
+
+    const options = {
+        viewEngine: {
+            defaultLayout: 'main',
+            layoutsDir: path.join(process.cwd(), 'email-templates', 'layouts'),
+            partialsDir: path.join(process.cwd(), 'email-templates', 'partials'),
+            extname: '.hbs',
+        },
+        extName: '.hbs',
+        viewPath: path.join(process.cwd(), 'email-templates', 'views'),
+    }
+
+    transporter.use('compile', hbs(options));
+    context.frontendURL = FRONTEND_URL;
+
+
+    return transporter.sendMail({
+        to: receiverMail,
+        subject: templateInfo.subject,
+        template: templateInfo.templateName,
+        context,
+    });
+};
 
 module.exports = {
-    hashPassword: (password) => bcrypt.hash(password, 10),
-
-    comparePasswords: async (hashPassword, password) => {
-        const isPasswordsSame = await bcrypt.compare(password, hashPassword);
-
-        if (!isPasswordsSame) {
-            throw new ApiError('Wrong email or password', 400);
-        }
-    },
-
-    generateAccessTokenPair: (dataToSign = {}) => {
-        const accessToken = jwt.sign(dataToSign, ACCESS_SECRET, { expiresIn: '15s' });
-        const refreshToken = jwt.sign(dataToSign, REFRESH_SECRET, { expiresIn: '30d' });
-
-        return {
-            accessToken,
-            refreshToken
-        }
-    },
-
-    generateActionToken: (actionType, dataToSign = {}) => {
-        let secretWord = '';
-
-        switch (actionType) {
-            case tokenTypes.CONFIRM_ACCOUNT:
-                secretWord = CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
-                break;
-            case tokenTypes.FORGOT_PASSWORD:
-                secretWord = FORGOT_PASSWORD_ACTION_TOKEN_SECRET;
-                break;
-        }
-
-        return jwt.sign(dataToSign, secretWord, { expiresIn: '7d' });
-    },
-
-    checkToken: (token = '', tokenType = tokenTypeEnum.accessToken) => {
-        try {
-            let secret = '';
-
-            if (tokenType === tokenTypeEnum.accessToken) secret = ACCESS_SECRET;
-            else if (tokenType === tokenTypeEnum.refreshToken) secret = REFRESH_SECRET;
-
-            return jwt.verify(token, secret);
-        } catch (e) {
-            throw new ApiError('Token not valid', 401);
-        }
-    },
-
-    checkActionToken: (token, actionType) => {
-        try {
-            let secretWord = '';
-
-            switch (actionType) {
-                case tokenTypes.CONFIRM_ACCOUNT:
-                    secretWord = CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
-                    break;
-                case tokenTypes.FORGOT_PASSWORD:
-                    secretWord = FORGOT_PASSWORD_ACTION_TOKEN_SECRET;
-                    break;
-            }
-
-            jwt.verify(token, secretWord);
-        } catch (e) {
-            throw new ApiError('Token not valid', 401);
-        }
-    }
-}
+    sendEmail,
+};
