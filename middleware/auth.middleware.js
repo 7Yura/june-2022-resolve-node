@@ -28,7 +28,7 @@ module.exports = {
 
     checkAccessToken: async (req, res, next) => {
         try {
-            await emailService.sendEmail('victor.fzs10@gmail.com', FORGOT_PASS);
+            await emailService.sendEmail('svitana7@gmail.com', FORGOT_PASS);
 
             const accessToken = req.get('Authorization');
 
