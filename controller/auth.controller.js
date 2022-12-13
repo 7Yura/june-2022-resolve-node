@@ -1,5 +1,8 @@
 const oauthService = require("../service/oauth.service");
 const emailService = require("../service/email.service");
+const smsService = require("../service/sms.service");
+const { smsActionTypeEnum } = require("../enum");
+const smsTemplate = require("../helper/sms-template.helper");
 const ActionToken = require("../dataBase/ActionToken");
 const OldPassword = require("../dataBase/OldPassword");
 const OAuth = require("../dataBase/OAuth");
@@ -13,9 +16,16 @@ module.exports = {
         try {
             const { user, body } = req;
 
-            await emailService.sendEmail(user.email, WELCOME, { userName: user.name, array: [{ number: 1}, { number: 2}, { number: 3}], condition: false });
+            // await emailService.sendEmail(user.email, WELCOME, { userName: user.name, array: [{ number: 1}, { number: 2}, { number: 3}], condition: false });
 
-            await oauthService.comparePasswords(user.password, body.password);
+            await Promise.allSettled([
+                emailService.sendEmail(user.email, WELCOME, { userName: user.name, array: [{ number: 1 }], condition: false }),
+                smsService.sendSms(smsTemplate[smsActionTypeEnum.WELCOME](user.name), user.phone)
+            ]);
+
+            // await emailService.sendEmail(user.email, WELCOME, { userName: user.name, array: [{ number: 1 }], condition: false }),
+            //     await smsService.sendSms(smsTemplate[smsActionTypeEnum.WELCOME](user.name), user.phone)
+            await user.comparePasswords(body.password);
 
             const tokenPair = oauthService.generateAccessTokenPair({ id: user._id });
 
