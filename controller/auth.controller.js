@@ -13,9 +13,10 @@ module.exports = {
             const { user, body } = req;
 
             console.log(WELCOME, '- AUTH CONTROLLER');
-            await emailService.sendEmail('victor.fzs10@gmail.com', WELCOME, { userName: user.name });
+            // await emailService.sendEmail('svitana7@gmail.com', WELCOME, { userName: user.name });
 
-            await oauthService.comparePasswords(user.password, body.password);
+            // await oauthService.comparePasswords(user.password, body.password);
+            await user.comparePasswords(body.password);
 
             const tokenPair = oauthService.generateAccessTokenPair({ id: user._id });
 
@@ -54,7 +55,7 @@ module.exports = {
             const forgotPassFEUrl = `${FRONTEND_URL}/password/new?token=${actionToken}`;
 
             await ActionToken.create({ token: actionToken, tokenType: FORGOT_PASSWORD, _user_id: user._id });
-            await emailService.sendEmail('victor.fzs10@gmail.com', FORGOT_PASS, { url: forgotPassFEUrl });
+            await emailService.sendEmail('svitana7@gmail.com', FORGOT_PASS, { url: forgotPassFEUrl });
 
             res.json('ok');
         } catch (e) {
